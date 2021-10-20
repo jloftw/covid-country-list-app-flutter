@@ -13,10 +13,11 @@ void main() {
 // - stateless: widget cuyo contenido no cambia
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: "ejemplito",
+        title: "Covid Countries List",
         theme: ThemeData(
           primaryColor: Colors.white,
         ),
@@ -34,45 +35,78 @@ class ListaWidget extends StatefulWidget {
 class _ListaWidgetState extends State<ListaWidget> {
   late List<String> _contenido;
   late TextStyle _estilito;
+  late Future<List<Country>> Countries;
 
   _ListaWidgetState() {
     _contenido = ["a", "b", "c", "d", "e"];
     _estilito = const TextStyle(fontSize: 15.0);
   }
+
+  @override
+  void initState() {
+    super.initState();
+    Countries = obtenerInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("APLICACION CON LISTITA"),
-        ),
-        body: _construyeLista());
+        appBar: AppBar(title: const Text("Covid Countries List")),
+        body: Center(
+            child: FutureBuilder<List<Country>>(
+                future: Countries,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return _construyeLista(snapshot.data!);
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  // aquí dejamos lo que muestra en lo que se decide si tiene datos o error
+                  return CircularProgressIndicator();
+                })));
   }
 
-  Widget _construyeLista() {
+  Widget _construyeLista(List<Country> CountryList) {
     return ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: _contenido.length,
+        itemCount: CountryList.length,
         itemBuilder: (context, i) {
-          return _construyeRow(_contenido[i]);
+          return _construyeRow(CountryList[i]);
         });
   }
 
-  Widget _construyeRow(String valor) {
+  Widget _construyeRow(Country current) {
     return ListTile(
-        title: Text(
-          valor,
-          style: _estilito,
-        ),
+        title: _rowCard(current),
         onTap: () {
           Fluttertoast.showToast(
-              msg: "presionaste: " + valor,
+              msg: "presionaste" + current.countryName,
               toastLength: Toast.LENGTH_LONG,
               gravity: ToastGravity.CENTER,
               timeInSecForIosWeb: 1);
 
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => VistaRequest()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const VistaRequest()));
         });
+  }
+
+  Widget _rowCard(Country current) {
+    return Card(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Image.network(current.flag.flagLink),
+          Text(
+            current.countryName,
+            style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+          ),
+          Text(
+            current.cases.toString(),
+            style: _estilito,
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -98,30 +132,22 @@ class VistaRequest extends StatefulWidget {
 }
 
 class _VistaRequestState extends State<VistaRequest> {
-  late Future<List<Country>> Countrys;
+  late Future<List<Country>> Countries;
 
   @override
   void initState() {
     super.initState();
-    Countrys = obtenerInfo();
+    Countries = obtenerInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("AQUI VA EL RESULTADO DEL REQUEST!")),
-        body: Center(
-            child: FutureBuilder<List<Country>>(
-                future: Countrys,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(snapshot.data![0].countryName);
-                  } else if (snapshot.hasError) {
-                    return Text('${snapshot.error}');
-                  }
-                  // aquí dejamos lo que muestra en lo que se decide si tiene datos o error
-                  return CircularProgressIndicator();
-                })));
+      appBar: AppBar(
+        title: const Text("Aqui va el detalle del pais"),
+      ),
+      body: const Center(child: Text("AQUI IRIA LA INFO!!")),
+    );
   }
 }
 
@@ -162,8 +188,8 @@ class Country {
 
 // declarar la funcion que va a obtener datos remotamente
 Future<List<Country>> obtenerInfo() async {
-  final response =
-      await http.get(Uri.parse('https://disease.sh/v3/covid-19/countries'));
+  final response = await http
+      .get(Uri.parse('https://disease.sh/v3/covid-19/countries?sort=cases'));
 
   if (response.statusCode == 200) {
     List<dynamic> list = jsonDecode(response.body);
