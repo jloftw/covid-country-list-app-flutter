@@ -12,12 +12,10 @@ class ListaWidget extends StatefulWidget {
 }
 
 class _ListaWidgetState extends State<ListaWidget> {
-  late List<String> _contenido;
   late TextStyle _estilito;
   late Future<List<Country>> Countries;
 
   _ListaWidgetState() {
-    _contenido = ["a", "b", "c", "d", "e"];
     _estilito = const TextStyle(fontSize: 15.0);
   }
 
@@ -40,7 +38,6 @@ class _ListaWidgetState extends State<ListaWidget> {
                   } else if (snapshot.hasError) {
                     return Text('${snapshot.error}');
                   }
-                  // aquí dejamos lo que muestra en lo que se decide si tiene datos o error
                   return CircularProgressIndicator();
                 })));
   }
@@ -64,8 +61,10 @@ class _ListaWidgetState extends State<ListaWidget> {
               gravity: ToastGravity.CENTER,
               timeInSecForIosWeb: 1);
 
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => VistaRequest(current: current)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => VistaRequest(current: current)));
         });
   }
 

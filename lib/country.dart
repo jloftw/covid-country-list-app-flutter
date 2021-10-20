@@ -11,7 +11,6 @@ class CountryInfo {
   }
 }
 
-// creamos una clase o una serie de clases para mapear contenido de JSON
 class Country {
   final String countryName;
   final int cases;
@@ -36,7 +35,6 @@ class Country {
   }
 }
 
-// declarar la funcion que va a obtener datos remotamente
 Future<List<Country>> obtenerInfo() async {
   final response = await http
       .get(Uri.parse('https://disease.sh/v3/covid-19/countries?sort=cases'));
@@ -53,7 +51,6 @@ Future<List<Country>> obtenerInfo() async {
     print(result);
     return result;
   } else {
-    // algún error por algún motivo
     throw Exception("HUBO ERROR EN REQUEST");
   }
 }

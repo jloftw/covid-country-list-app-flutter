@@ -5,10 +5,6 @@ void main() {
   runApp(const MyApp());
 }
 
-// GUI se estructura en widgets
-// widgets pueden ser stateless o stateful
-// - stateful: widget cuyo contenido puede cambiar
-// - stateless: widget cuyo contenido no cambia
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
